@@ -30,7 +30,7 @@ def pool(inputs, kernel, outputs, padding, strides, argmax, k=(1, 1)):
                     step1 = np.zeros((y_max-y_min, k_w))
                     step1_indexes = np.zeros((y_max-y_min, k_w))
                     step1_mins = np.zeros(y_max-y_min)
-                    step1_min_local_indexes =  np.zeros(y_max-y_min)
+                    step1_min_local_indexes = np.zeros(y_max-y_min, dtype=int)
                     for y in range(0, y_max-y_min):
                         step1_mins[y] = inputs[i, y_min+y, x_min, c]
                         step1_min_local_indexes[y] = 0
@@ -53,8 +53,8 @@ def pool(inputs, kernel, outputs, padding, strides, argmax, k=(1, 1)):
                                     if step1[y, xi] < step1_mins[y]:
                                         step1_mins[y] = step1[y, xi]
                                         step1_min_local_indexes[y] = xi
-                    step2_mins = np.zeros(k_h)
-                    step2_min_local_indexes = np.zeros(k_h)
+                    step2_mins = np.zeros(k_w)
+                    step2_min_local_indexes = np.zeros(k_w, dtype=int)
                     for x in range(0, k_w):
                         step2_mins[x] = step1[0, x]
                         step2_min_local_indexes[x] = 0
@@ -65,7 +65,7 @@ def pool(inputs, kernel, outputs, padding, strides, argmax, k=(1, 1)):
                                 step2_mins[x] = step1[y, x]
                                 step2_min_local_indexes[x] = y
                         for y in range(min(k_h, y_max-y_min), y_max-y_min):
-                            if step1[x, y] > step2_mins[x]:
+                            if step1[y, x] > step2_mins[x]:
                                 for yi in range(step2_min_local_indexes[x], k_h-1):
                                     outputs[i, y_out, x_out, c, yi, x] = outputs[i, y_out, x_out, c, yi+1, x]
                                     argmax[i, y_out, x_out, c, yi, x] = argmax[i, y_out, x_out, c, yi+1, x]
